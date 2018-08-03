@@ -1,7 +1,7 @@
 import subprocess, argparse
 
 
-def main(inFile):
+def main(inFile, fastq_dir, fast_test_mode):
 	"""
 
 	:param inFile:
@@ -18,8 +18,10 @@ def main(inFile):
 			print('SRA detected')
 			print(line[4])
 
-			#subprocess.run(['fastq-dump', '-X', '5', '-I', '--split-files', line[4]])
-			subprocess.run(['fastq-dump', '-I', '--split-files', line[4]])
+			if fast_test_mode:
+				subprocess.run(['fastq-dump', '-X', '5', '-I', '--split-files', line[4]])
+			else:
+				subprocess.run(['fastq-dump', '-I', '--split-files', line[4]])
 
 			print(line)
 			new_line = line[0] + ',' + line[1] + ',' + line[2] + ',' + line[3] + ',' + fastq_dir + line[
@@ -39,11 +41,14 @@ if __name__ == '__main__':
 
 	parser.add_argument('-i', '--input_file', type=str, help='Input sample file')
 	parser.add_argument('-f', '--fastq_dir', type=str, help='Directory where reads from the SRA will be moved')
+	parser.add_argument('-q', '--quick_test_mode', type=bool, default=False, help='Only download first 5 spots from SRA')
+
 
 	args = parser.parse_args()
 
 	inFile = args.input_file
 	fastq_dir = args.fastq_dir
+	fast_test_mode = args.quick_test_mode
 
-	main(inFile)
+	main(inFile, fastq_dir, fast_test_mode)
 
