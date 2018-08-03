@@ -62,7 +62,8 @@ def filter_vcf_list(vcf_list, min_qual, min_depth=0, min_maping_qual=0, max_dept
 
 	return filtered_vcf_list
 
-def export_to_fasta_aln(vcf_list_of_objects, out_file_name):
+
+def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 	# print first info line
 	number_of_variants = len(vcf_list_of_objects)
 	list_of_samples = vcf_list_of_objects[0].sample_dict.keys()
@@ -103,37 +104,37 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name):
 		out_fasta.write(nuc_string + '\n')
 
 
-def main(inFile, output_dir, qual_filter=2000):
+def main(inFile, output_dir, qual_filter, ignore_mv_sites):
 	"""
 
 	:param inFile:
 	:param output_dir:
 	:return:
 	"""
-	ignore_mv_sites = True
-
 	invcf = input_parser(inFile)
 
 	filtered_vcf_list = filter_vcf_list(invcf, qual_filter)
 
-	export_to_fasta_aln(filtered_vcf_list, output_dir)
+	export_to_fasta_aln(filtered_vcf_list, output_dir, ignore_mv_sites)
 
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
-		description='''A de-multiplexer tool Input for primers is csv separated by a comma. 
-		Headings include: gene_name,fwd_sequence,fwd_PID_len,rev_sequence,rev_pid,overlapping
-		overlapping = True if the the fwd and rev reads overlap, else overlapping = False
+		description='''A tool for the conversion of vcf files into aligned fasta format so that they may be used in 
+		phylogenetic tree construction.
 		''',  epilog="""Version 0.1""")
 
 	parser.add_argument('-i', '--input_file', type=str, help='Input file in vcf format')
 	parser.add_argument('-o', '--output_file', type=str, help='Output fasta file name')
 	parser.add_argument('-q', '--quality', type=int, default=2000, help='Quality threshold for variants')
-	parser.add_argument('-m', '--ignore_mv_sites', type=int, default=2000, help='Exclude sites with more than one alt allele')
+	parser.add_argument('-m', '--ignore_mv_sites', type=bool, default=True, help='Exclude sites with more than one alt allele')
 
 	args = parser.parse_args()
 
 	inFile = args.input_file
 	output_dir = args.output_file
-	main(inFile, output_dir)
+	qual_filter = args.quality
+	ignore_mv_sites = args.ignore_mv_sites
+
+	main(inFile, output_dir, qual_filter, ignore_mv_sites)
 
