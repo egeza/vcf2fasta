@@ -19,9 +19,9 @@ def main(inFile, fastq_dir, fast_test_mode):
 			print(line[4])
 
 			if fast_test_mode:
-				subprocess.run(['fastq-dump', '-X', '5', '-I', '--split-files', line[4]])
+				subprocess.run(['fastq-dump', '-X', '5', '-I', '--split-files', line[4].rstrip()])
 			else:
-				subprocess.run(['fastq-dump', '-I', '--split-files', line[4]])
+				subprocess.run(['fastq-dump', '-I', '--split-files', line[4].rstrip()])
 
 			print(line)
 			new_line = line[0] + ',' + line[1] + ',' + line[2] + ',' + line[3] + ',' + fastq_dir + line[
