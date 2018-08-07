@@ -13,23 +13,26 @@ def main(inFile, fastq_dir, fast_test_mode):
 	output_file = open(new_sample_sheet, 'w')
 
 	for line in input_file:
+		line = line.rstrip()
 		line = line.split(',')
 		if line[4].split('.')[-1] != 'fq' and line[4].split('.')[-1] != 'fastq' and line[4].split('.')[-1] != 'R1':
 			print('SRA detected')
 			print(line[4])
 
 			if fast_test_mode:
-				subprocess.run(['fastq-dump', '-X', '5', '-I', '--split-files', line[4].rstrip()])
+				print(line[4])
+				subprocess.run(['fastq-dump', '-X', '5', '-I', '--split-files', line[4]])
 			else:
-				subprocess.run(['fastq-dump', '-I', '--split-files', line[4].rstrip()])
+				print(line[4])
+				subprocess.run(['fastq-dump', '-I', '--split-files', line[4]])
 
-			print(line)
-			new_line = line[0] + ',' + line[1] + ',' + line[2] + ',' + line[3] + ',' + fastq_dir + line[
-				4] + '_1.fastq' + ',' + fastq_dir + line[4] + '_2.fastq' + '\n'
+			new_line = line[0] + ',' + line[1] + ',' + line[2] + ',' + line[3] + ',' + fastq_dir + line[4] + '_1.fastq' + ',' + fastq_dir + line[4] + '_2.fastq' + '\n'
+			print(new_line)
 			output_file.write(new_line)
 
 		else:
 			new_line = ",".join(map(str, line))
+			new_line = new_line + '\n'
 			output_file.write(new_line)
 
 
