@@ -52,13 +52,20 @@ def input_parser(file_path):
 		return list_of_objs
 
 
-def filter_vcf_list(vcf_list, min_qual, min_depth=0, min_maping_qual=0, max_depth=10000):
+def filter_vcf_list(vcf_list, min_qual, use_filter_column, min_depth=0, min_maping_qual=0, max_depth=10000):
 	filtered_vcf_list = []
 
-	for line in vcf_list:
-		if line.qual != '.':
-			if float(line.qual) > min_qual:
+	if use_filter_column:
+		print('Already filtered')
+		for line in vcf_list:
+			if line.filter == 'PASS':
 				filtered_vcf_list.append(line)
+
+	else:
+		for line in vcf_list:
+			if line.qual != '.':
+				if float(line.qual) > min_qual:
+					filtered_vcf_list.append(line)
 
 	return filtered_vcf_list
 
@@ -71,6 +78,17 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 
 	out_fasta = open(out_file_name + '.fa', 'w')
 
+	# Export the reference sequence
+	out_fasta.write('>' + vcf_list_of_objects[0].chr + '\n')
+	nuc_string = ''
+
+	for ref_variant in vcf_list_of_objects:
+		nuc_string += ref_variant.refAllele
+	out_fasta.write(nuc_string + '\n')
+
+
+
+	# Export the other sequences
 	for a_sample in list_of_samples:
 		out_fasta.write('>' + a_sample + '\n')
 		nuc_string = ''
@@ -104,7 +122,7 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 		out_fasta.write(nuc_string + '\n')
 
 
-def main(inFile, output_dir, qual_filter, ignore_mv_sites):
+def main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column):
 	"""
 
 	:param inFile:
@@ -113,7 +131,7 @@ def main(inFile, output_dir, qual_filter, ignore_mv_sites):
 	"""
 	invcf = input_parser(inFile)
 
-	filtered_vcf_list = filter_vcf_list(invcf, qual_filter)
+	filtered_vcf_list = filter_vcf_list(invcf, qual_filter, use_filter_column)
 
 	export_to_fasta_aln(filtered_vcf_list, output_dir, ignore_mv_sites)
 
@@ -128,6 +146,8 @@ if __name__ == '__main__':
 	parser.add_argument('-o', '--output_file', type=str, help='Output fasta file name')
 	parser.add_argument('-q', '--quality', type=int, default=2000, help='Quality threshold for variants')
 	parser.add_argument('-m', '--ignore_mv_sites', type=bool, default=True, help='Exclude sites with more than one alt allele')
+	parser.add_argument('-f', '--already_filtered', type=bool, default=False, help='Use the FILTER column to keep / drop variants')
+
 
 	args = parser.parse_args()
 
@@ -135,6 +155,7 @@ if __name__ == '__main__':
 	output_dir = args.output_file
 	qual_filter = args.quality
 	ignore_mv_sites = args.ignore_mv_sites
+	use_filter_column = args.already_filtered
 
-	main(inFile, output_dir, qual_filter, ignore_mv_sites)
+	main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column)
 
