@@ -67,7 +67,11 @@ def filter_vcf_list(vcf_list, min_qual, use_filter_column, min_depth=0, min_mapi
 				if float(line.qual) > min_qual:
 					filtered_vcf_list.append(line)
 
-	return filtered_vcf_list
+	if len(filtered_vcf_list) == 0 and len(vcf_list) > 0:
+		print('All variants removed by filter')
+
+	else:
+		return filtered_vcf_list
 
 
 def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
@@ -100,12 +104,7 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 				if len(variant.altAllele) != 1 and ignore_mv_sites is False:
 					print("resolving multi allele sites")
 					if int(variant.sample_dict[a_sample]['AD'].split(',')[0]) < int(variant.sample_dict[a_sample]['AD'].split(',')[1]):
-						#print(variant.altAllele)
-						#print(variant.sample_dict[a_sample])
 
-						#print(variant.sample_dict[a_sample]['AD'].split(','))
-						#print(variant.qual)
-						#print(variant.sample_dict[a_sample])
 						if variant.sample_dict[a_sample]['GT'] == './.':
 							nuc_string += variant.refAllele
 						else:
@@ -117,7 +116,12 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 						nuc_string += variant.altAllele
 
 				elif len(variant.altAllele) == 1:
-					nuc_string += variant.altAllele
+					print('here')
+					print(variant.sample_dict[a_sample])
+					if variant.sample_dict[a_sample]['GT'] == '1':
+						nuc_string += variant.altAllele
+					if variant.sample_dict[a_sample]['GT'] == '.':
+						nuc_string += variant.refAllele
 
 		out_fasta.write(nuc_string + '\n')
 
