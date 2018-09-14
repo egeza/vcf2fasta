@@ -116,17 +116,24 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 						nuc_string += variant.altAllele
 
 				elif len(variant.altAllele) == 1:
-					print('here')
-					print(variant.sample_dict[a_sample])
-					if variant.sample_dict[a_sample]['GT'] == '1':
-						nuc_string += variant.altAllele
-					if variant.sample_dict[a_sample]['GT'] == '.':
-						nuc_string += variant.refAllele
+
+
+					if ignore_het:
+						if variant.sample_dict[a_sample]['GT'] == '1' or variant.sample_dict[a_sample]['GT'] == '1/1':
+							nuc_string += variant.altAllele
+						if variant.sample_dict[a_sample]['GT'] == '.' or variant.sample_dict[a_sample]['GT'] == '0/1':
+							nuc_string += variant.refAllele
+
+					else:
+						if variant.sample_dict[a_sample]['GT'] == '1' or variant.sample_dict[a_sample]['GT'] == '1/1' or variant.sample_dict[a_sample]['GT'] == '0/1':
+							nuc_string += variant.altAllele
+						if variant.sample_dict[a_sample]['GT'] == '.':
+							nuc_string += variant.refAllele
 
 		out_fasta.write(nuc_string + '\n')
 
 
-def main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column):
+def main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ignore_het):
 	"""
 
 	:param inFile:
@@ -151,6 +158,7 @@ if __name__ == '__main__':
 	parser.add_argument('-q', '--quality', type=int, default=2000, help='Quality threshold for variants')
 	parser.add_argument('-m', '--ignore_mv_sites', type=bool, default=True, help='Exclude sites with more than one alt allele')
 	parser.add_argument('-f', '--already_filtered', type=bool, default=False, help='Use the FILTER column to keep / drop variants')
+	parser.add_argument('-e', '--ignore_heterozygous', type=bool, default=False, help='Set to True to ignore variants that are 0/1')
 
 
 	args = parser.parse_args()
@@ -160,6 +168,7 @@ if __name__ == '__main__':
 	qual_filter = args.quality
 	ignore_mv_sites = args.ignore_mv_sites
 	use_filter_column = args.already_filtered
+	ignore_het = args.ignore_heterozygous
 
-	main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column)
+	main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ignore_het)
 
