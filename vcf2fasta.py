@@ -74,7 +74,7 @@ def filter_vcf_list(vcf_list, min_qual, use_filter_column, min_depth=0, min_mapi
 		return filtered_vcf_list
 
 
-def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
+def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites, alt_only):
 	# print first info line
 	number_of_variants = len(vcf_list_of_objects)
 	list_of_samples = vcf_list_of_objects[0].sample_dict.keys()
@@ -82,13 +82,14 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 
 	out_fasta = open(out_file_name + '.fa', 'w')
 
-	# Export the reference sequence
-	out_fasta.write('>' + vcf_list_of_objects[0].chr + '\n')
-	nuc_string = ''
+	if alt_only is False:
+		# Export the reference sequence
+		out_fasta.write('>' + vcf_list_of_objects[0].chr + '\n')
+		nuc_string = ''
 
-	for ref_variant in vcf_list_of_objects:
-		nuc_string += ref_variant.refAllele
-	out_fasta.write(nuc_string + '\n')
+		for ref_variant in vcf_list_of_objects:
+			nuc_string += ref_variant.refAllele
+		out_fasta.write(nuc_string + '\n')
 
 
 
@@ -133,7 +134,7 @@ def export_to_fasta_aln(vcf_list_of_objects, out_file_name, ignore_mv_sites):
 		out_fasta.write(nuc_string + '\n')
 
 
-def main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ignore_het):
+def main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ignore_het, alt_only):
 	"""
 
 	:param inFile:
@@ -144,7 +145,7 @@ def main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ig
 
 	filtered_vcf_list = filter_vcf_list(invcf, qual_filter, use_filter_column)
 
-	export_to_fasta_aln(filtered_vcf_list, output_dir, ignore_mv_sites)
+	export_to_fasta_aln(filtered_vcf_list, output_dir, ignore_mv_sites, alt_only)
 
 
 if __name__ == '__main__':
@@ -159,6 +160,7 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--ignore_mv_sites', type=bool, default=True, help='Exclude sites with more than one alt allele')
 	parser.add_argument('-f', '--already_filtered', type=bool, default=False, help='Use the FILTER column to keep / drop variants')
 	parser.add_argument('-e', '--ignore_heterozygous', type=bool, default=False, help='Set to True to ignore variants that are 0/1')
+	parser.add_argument('-a', '--alt_only', type=bool, default=False, help='Set to True to only include the alt alleles in the output fasta')
 
 
 	args = parser.parse_args()
@@ -169,6 +171,7 @@ if __name__ == '__main__':
 	ignore_mv_sites = args.ignore_mv_sites
 	use_filter_column = args.already_filtered
 	ignore_het = args.ignore_heterozygous
+	alt_only = args.alt_only
 
-	main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ignore_het)
+	main(inFile, output_dir, qual_filter, ignore_mv_sites, use_filter_column, ignore_het, alt_only)
 
