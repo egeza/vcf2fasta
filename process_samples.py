@@ -15,7 +15,7 @@ def main(inFile, fastq_dir, fast_test_mode):
 	for line in input_file:
 		line = line.rstrip()
 		line = line.split(',')
-		if line[4].split('.')[-1] != 'fq' and line[4].split('.')[-1] != 'fastq' and line[4].split('.')[-1] != 'R1':
+		if line[4].split('.')[-1] != 'fq' and line[4].split('.')[-1] != 'fastq' and line[4].split('.')[-1] != 'R1' and line[4].split('.')[-1] != 'gz':
 			print('SRA detected')
 			print(line[4])
 
